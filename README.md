@@ -8,7 +8,7 @@ QMSV contains build systems with syntax highlighting and in line errors* for Qua
 
 ## Installation
 
-- [Python](https://www.python.org/downloads/) 2.7.x and 3.7.x
+- [Python](https://www.python.org/downloads/) 3.7.x
 -  [Sublime Text 3](https://www.sublimetext.com/3)
 - [Install Package Control](https://packagecontrol.io/installation)
 - Install Sublime System Verilog from Package Control(ctrl+shift+p and type Package Control Install Package) and search for it 
@@ -32,6 +32,18 @@ Besides creating the Quartus project quartusregen.py is also used to update it. 
 The test.py file is used to run VUnit for any tests or simulations, it is created with a basic template that can be used right off the bat.
 
 The work folder is just there to appease ModelSim, currently it won't _work_ without it.
+
+## Trying Out QMSV
+
+A good project to test QMSV with is the [VUnit verilog uart example](https://github.com/VUnit/vunit/tree/master/examples/verilog/uart/src).
+
+When using quartusregen.py just change the first four variables to:
+- topfile = "uart_rx"
+- tb_topfile = "tb_uart_rx"
+- topfile_lib = "uart_lib"
+- tb_topfile_lib = "tb_uart_lib" 
+
+Download the example and put the four files into the 'src' and 'src/test' folders, and that's it!
 
 ## Basic Usage
 

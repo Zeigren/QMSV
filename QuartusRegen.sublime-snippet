@@ -2,7 +2,6 @@
 	<content><![CDATA[
 from time import strftime
 import pathlib
-import os
 
 
 # Variables and Templates
@@ -13,16 +12,18 @@ tb_topfile = "${2:tb_topfile}"
 topfile_lib = "${3:topfile_lib}"
 tb_topfile_lib = "${4:tb_topfile_lib}"
 quartus_version = "${5:18.0}"
+last_quartus_version = "${6:18.0.0 Lite Edition}"
+family = "\"${7:MAX10}\""
+device = "${8:10M08SCE144C8G}"
+io_standard = "\"${9:3.3-V LVCMOS}\""
+vcca = "${10:3.3V}"
+supply_voltage = "${11:3.3V}"
+device_migration = "\"${12:10M08SCE144C8G,10M04SCE144C8G}\""
 date = strftime("%H:%M:%S %B %d, %Y")
-family = "\"${6:MAX10}\""
-device = "${7:10M08SCE144C8G}"
-io_standard = "\"${8:3.3-V LVCMOS}\""
-vcca = "${9:3.3V}"
-supply_voltage = "${10:3.3V}"
-device_migration = "\"${11:10M08SCE144C8G,10M04SCE144C8G}\""
 
 set_global = "set_global_assignment -name "
 qsf_template = (
+    f"TOP_LEVEL_ENTITY {topfile}",
     f"FAMILY {family}",
     f"DEVICE {device}",
     f"STRATIX_DEVICE_IO_STANDARD {io_standard}",
@@ -66,6 +67,7 @@ qsf_template = (
     "VHDL_SHOW_LMF_MAPPING_MESSAGES OFF",
     "EDA_NETLIST_WRITER_OUTPUT_DIR output_files/simulation/modelsim -section_id eda_simulation",
     "EDA_NETLIST_WRITER_OUTPUT_DIR output_files/board/ibis -section_id eda_board_design_signal_integrity",
+    f"LAST_QUARTUS_VERSION \"{last_quartus_version}\"",
     f"SYSTEMVERILOG_FILE src/{topfile}.sv"
 )
 
@@ -115,43 +117,41 @@ quartus_filetypes = {
 
 def create_quartus_qpf():
 
-    f = open(f"{topfile}.qpf", "w+")
-    f.writelines(
-        f"QUARTUS_VERSION = \"{quartus_version}\"\nDATE = \"{date}\"\n\n# Revisions\n\nPROJECT_REVISION = \"{topfile}\"")
-    f.close()
+    with open(f"{topfile}.qpf", "w+") as f:
+        f.writelines(f"QUARTUS_VERSION = \"{quartus_version}\"\nDATE = \"{date}\"\n\n# Revisions\n\nPROJECT_REVISION = \"{topfile}\"")
 
 
 def create_quartus_qsf():
 
-    f = open(f"{topfile}.qsf", "w+")
-    f.write("set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top\n")
-    for i, item in enumerate(qsf_template):
-        f.writelines(set_global + item + "\n")
-    f.close()
+    with open(f"{topfile}.qsf", "w+") as f:
+            f.write("set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top\n")
+            for i, item in enumerate(qsf_template):
+                f.writelines(set_global + item + "\n")
 
 
 def create_test():
 
-    f = open("test.py", "w+")
-    for i, item in enumerate(test_template):
-        f.writelines(item + "\n")
-    f.close()
+    with open("test.py", "w+") as f:
+        for i, item in enumerate(test_template):
+            f.writelines(item + "\n")
 
 
 def create_topfile():
 
-    topfilegen = f"src/{topfile}.sv"
-    os.makedirs(os.path.dirname(topfilegen), exist_ok=True)
-    with open(topfilegen, "w") as f:
+    pathlib.Path('src').mkdir(parents=True, exist_ok=True)
+    with open(f"src/{topfile}.sv", "w") as f:
         f.write(f"{topfile}.sv")
 
 
 def create_tb_topfile():
 
-    tb_topfilegen = f"src/test/{tb_topfile}.sv"
-    os.makedirs(os.path.dirname(tb_topfilegen), exist_ok=True)
-    with open(tb_topfilegen, "w") as f:
+    pathlib.Path('src/test').mkdir(parents=True, exist_ok=True)
+    with open(f"src/test/{tb_topfile}.sv", "w") as f:
         f.write(f"{tb_topfile}.sv")
+
+def create_work_dir():
+
+    pathlib.Path('work').mkdir(parents=True, exist_ok=True)
 
 
 def update_quartus_qsf():
@@ -224,6 +224,14 @@ elif sorted(pathlib.Path('.').glob('*.qsf')):
 else:
     print("Creating Quartus QSF file")
     create_quartus_qsf()
+
+
+# Create work dir for ModelSim
+if pathlib.Path('work').exists():
+    print("Work folder already exists")
+else:
+    create_work_dir()
+    print("Creating work folder")
 
 ]]></content>
 	<tabTrigger>QuartusRegen</tabTrigger>
