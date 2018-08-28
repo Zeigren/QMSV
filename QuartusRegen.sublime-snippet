@@ -1,0 +1,232 @@
+<snippet>
+	<content><![CDATA[
+from time import strftime
+import pathlib
+import os
+
+
+# Variables and Templates
+
+
+topfile = "${1:topfile}"
+tb_topfile = "${2:tb_topfile}"
+topfile_lib = "${3:topfile_lib}"
+tb_topfile_lib = "${4:tb_topfile_lib}"
+quartus_version = "${5:18.0}"
+date = strftime("%H:%M:%S %B %d, %Y")
+family = "\"${6:MAX10}\""
+device = "${7:10M08SCE144C8G}"
+io_standard = "\"${8:3.3-V LVCMOS}\""
+vcca = "${9:3.3V}"
+supply_voltage = "${10:3.3V}"
+device_migration = "\"${11:10M08SCE144C8G,10M04SCE144C8G}\""
+
+set_global = "set_global_assignment -name "
+qsf_template = (
+    f"FAMILY {family}",
+    f"DEVICE {device}",
+    f"STRATIX_DEVICE_IO_STANDARD {io_standard}",
+    f"VCCA_USER_VOLTAGE {vcca}",
+    f"NOMINAL_CORE_SUPPLY_VOLTAGE {supply_voltage}",
+    f"DEVICE_MIGRATION_LIST {device_migration}",
+    "PROJECT_OUTPUT_DIRECTORY output_files",
+    "MIN_CORE_JUNCTION_TEMP 0",
+    "MAX_CORE_JUNCTION_TEMP 85",
+    "ENABLE_OCT_DONE OFF",
+    "EN_USER_IO_WEAK_PULLUP OFF",
+    "EN_SPI_IO_WEAK_PULLUP OFF",
+    "EXTERNAL_FLASH_FALLBACK_ADDRESS 00000000",
+    "USE_CONFIGURATION_DEVICE OFF",
+    "ERROR_CHECK_FREQUENCY_DIVISOR 256",
+    "CRC_ERROR_OPEN_DRAIN OFF",
+    "FORCE_CONFIGURATION_VCCIO ON",
+    "RESERVE_ALL_UNUSED_PINS_WEAK_PULLUP \"AS INPUT TRI-STATED\"",
+    "OUTPUT_IO_TIMING_NEAR_END_VMEAS \"HALF VCCIO\" -rise",
+    "OUTPUT_IO_TIMING_NEAR_END_VMEAS \"HALF VCCIO\" -fall",
+    "OUTPUT_IO_TIMING_FAR_END_VMEAS \"HALF SIGNAL SWING\" -rise",
+    "OUTPUT_IO_TIMING_FAR_END_VMEAS \"HALF SIGNAL SWING\" -fall",
+    "POWER_PRESET_COOLING_SOLUTION \"NO HEAT SINK WITH STILL AIR\"",
+    "POWER_BOARD_THERMAL_MODEL \"NONE (CONSERVATIVE)\"",
+    "FLOW_ENABLE_POWER_ANALYZER ON",
+    "POWER_DEFAULT_INPUT_IO_TOGGLE_RATE \"12.5 %\"",
+    "TIMING_ANALYZER_MULTICORNER_ANALYSIS ON",
+    "NUM_PARALLEL_PROCESSORS ALL",
+    "PARTITION_NETLIST_TYPE SOURCE -section_id Top",
+    "PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top",
+    "PARTITION_COLOR 16764057 -section_id Top", "FLOW_ENABLE_IO_ASSIGNMENT_ANALYSIS ON",
+    "OCP_HW_EVAL DISABLE", "EDA_SIMULATION_TOOL \"ModelSim-Altera (SystemVerilog)\"",
+    "EDA_TIME_SCALE \"1 ps\" -section_id eda_simulation",
+    "EDA_OUTPUT_DATA_FORMAT \"SYSTEMVERILOG HDL\" -section_id eda_simulation",
+    "EDA_BOARD_DESIGN_SIGNAL_INTEGRITY_TOOL \"IBIS (Signal Integrity)\"",
+    "EDA_OUTPUT_DATA_FORMAT IBIS -section_id eda_board_design_signal_integrity",
+    "VERILOG_INPUT_VERSION SYSTEMVERILOG_2005", "VERILOG_SHOW_LMF_MAPPING_MESSAGES OFF",
+    "GENERATE_SVF_FILE ON", "EDA_MAP_ILLEGAL_CHARACTERS ON -section_id eda_simulation",
+    "EDA_ENABLE_GLITCH_FILTERING OFF -section_id eda_simulation",
+    "VHDL_INPUT_VERSION VHDL_2008",
+    "VHDL_SHOW_LMF_MAPPING_MESSAGES OFF",
+    "EDA_NETLIST_WRITER_OUTPUT_DIR output_files/simulation/modelsim -section_id eda_simulation",
+    "EDA_NETLIST_WRITER_OUTPUT_DIR output_files/board/ibis -section_id eda_board_design_signal_integrity",
+    f"SYSTEMVERILOG_FILE src/{topfile}.sv"
+)
+
+test_template = (
+    "from os.path import join, dirname",
+    "from vunit.verilog import VUnit",
+    "\n",
+    "ui = VUnit.from_argv()",
+    "\n",
+    "#Name for generated libraries like 'uart_lib' and 'tb_uart_lib'",
+    f"topfile = '{topfile_lib}'",
+    f"tb_topfile = '{tb_topfile_lib}'",
+    "\n",
+    "src_path = join(dirname(__file__), \"src\")",
+    "\n",
+    "topfile = ui.add_library(f'{topfile}')",
+    "topfile.add_source_files(join(src_path, \"*.sv\"))",
+    "\n",
+    "tb_topfile = ui.add_library(f'{tb_topfile}')",
+    "tb_topfile.add_source_files(join(src_path, \"test\", \"*.sv\"))"
+    "\n",
+    "ui.main()"
+)
+
+quartus_filetypes = {
+    ".verilog": "VERILOG_FILE",
+    ".vhdl": "VHDL_FILE",
+    ".vhd": "VHDL_FILE",
+    ".sdc": "SDC_FILE",
+    ".tdf": "AHDL_FILE",
+    ".bdf": "BDF_FILE",
+    ".edf": "EDIF_FILE",
+    ".smf": "SMF_FILE",
+    ".tcl": "TCL_SCRIPT_FILE",
+    ".hex": "HEX_FILE",
+    ".mif": "MIF_FILE",
+    ".inc": "INCLUDE_FILE",
+    ".bsf": "BSF_FILE",
+    ".txt": "TEXT_FILE",
+    ".sv": "SYSTEMVERILOG_FILE",
+    ".v": "VERILOG_FILE"
+}
+
+
+# Functions
+
+
+def create_quartus_qpf():
+
+    f = open(f"{topfile}.qpf", "w+")
+    f.writelines(
+        f"QUARTUS_VERSION = \"{quartus_version}\"\nDATE = \"{date}\"\n\n# Revisions\n\nPROJECT_REVISION = \"{topfile}\"")
+    f.close()
+
+
+def create_quartus_qsf():
+
+    f = open(f"{topfile}.qsf", "w+")
+    f.write("set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top\n")
+    for i, item in enumerate(qsf_template):
+        f.writelines(set_global + item + "\n")
+    f.close()
+
+
+def create_test():
+
+    f = open("test.py", "w+")
+    for i, item in enumerate(test_template):
+        f.writelines(item + "\n")
+    f.close()
+
+
+def create_topfile():
+
+    topfilegen = f"src/{topfile}.sv"
+    os.makedirs(os.path.dirname(topfilegen), exist_ok=True)
+    with open(topfilegen, "w") as f:
+        f.write(f"{topfile}.sv")
+
+
+def create_tb_topfile():
+
+    tb_topfilegen = f"src/test/{tb_topfile}.sv"
+    os.makedirs(os.path.dirname(tb_topfilegen), exist_ok=True)
+    with open(tb_topfilegen, "w") as f:
+        f.write(f"{tb_topfile}.sv")
+
+
+def update_quartus_qsf():
+
+    lines = []
+    print("Rebuilding")
+    for line in open(f'{topfile}.qsf').readlines():
+        lines.append(line)
+        for key in quartus_filetypes:
+            if key in line:
+                lines.remove(line)
+                break
+    print("Rebuilt")
+    open(f'{topfile}.qsf', 'w').writelines(lines)
+    src_files = sorted(pathlib.Path('./src').glob('*.*'))
+    for i, item in enumerate(src_files):
+        item_string = str(item)
+        file_name = item_string.replace('\\\', '/')
+        suffix = pathlib.PurePath(item).suffix
+        if suffix not in quartus_filetypes:
+            print(file_name + " not a supported filetype")
+        elif file_name in open(f'{topfile}.qsf').read():
+            print(file_name + f" already exists in {topfile}.qsf")
+        elif file_name not in open(f'{topfile}.qsf').read():
+            print("Adding " + file_name + f" to {topfile}.qsf")
+            open(f'{topfile}.qsf', 'a+').write(set_global + quartus_filetypes.get(suffix) + " " + file_name + "\n")
+
+
+# Logic
+
+
+# Create Quartus .qpf file
+if sorted(pathlib.Path('.').glob('*.qpf')):
+    print("A Quartus QPF file already exists")
+else:
+    print("Creating Quartus QPF file")
+    create_quartus_qpf()
+
+
+# Create test.py
+if pathlib.Path('test.py').exists():
+    print("A test.py file already exists")
+else:
+    print("Creating test.py")
+    create_test()
+
+
+# Create topfile and src dir
+if pathlib.Path(f'./src/{topfile}.sv').exists():
+    print(f"src folder already contains '{topfile}.sv'")
+else:
+    print(f"Creating '{topfile}.sv' in /src")
+    create_topfile()
+
+
+# Create tb_topfile and test dir
+if pathlib.Path(f'./src/test/{tb_topfile}.sv').exists():
+    print(f"src/test folder already contains '{tb_topfile}.sv'")
+else:
+    print(f"Creating '{tb_topfile}.sv' in /src/test")
+    create_tb_topfile()
+
+
+# Create/Update Quartus .qsf file
+if pathlib.Path(f'{topfile}.qsf').exists():
+    print(f"Updating '{topfile}' Quartus QSF file")
+    update_quartus_qsf()
+elif sorted(pathlib.Path('.').glob('*.qsf')):
+    print("A Quartus QSF file already exists")
+else:
+    print("Creating Quartus QSF file")
+    create_quartus_qsf()
+
+]]></content>
+	<tabTrigger>QuartusRegen</tabTrigger>
+	<description>Template for QuartusRegen.py</description>
+	<scope>source.python</scope>
+</snippet>

@@ -1,0 +1,54 @@
+{
+	"cmd": "python test.py -v",
+	"working_dir" : "$folder",
+	"file_patterns": ["*.sv"],
+	"selector": "source.SystemVerilog",
+	"syntax": "VUnitCLI.sublime-syntax",
+	"variants" : [
+		{
+			"name" : "list all test cases",
+			"cmd" : "python test.py -v -l",
+		},
+		{
+			"name" : "list all files in compile order",
+			"cmd" : "python test.py -v -f",
+		},
+		{
+			"name" : "compile project without running tests",
+			"cmd" : "python test.py -v --compile",
+		},
+		{
+			"name" : "continue compiling even after errors",
+			"cmd" : "python test.py -v -k",
+		},
+		{
+			"name" : "stop immediately on first failing test",
+			"cmd" : "python test.py -v --fail-fast",
+		},
+		{
+			"name" : "elaborate test benches without running",
+			"cmd" : "python test.py -v --elaborate",
+		},
+		{
+			"name" : "remove output path first",
+			"cmd" : "python test.py -v --clean",
+		},
+		{
+			"name" : "let exceptions bubble up all the way",
+			"cmd" : "python test.py -v --dont-catch-exceptions",
+		},
+		{
+			"name" : "do not re-use the same simulator process",
+			"cmd" : "python test.py -v -u",
+		},
+		{
+			"name" : "enable code coverage",
+			"cmd" : "python test.py -v --coverage",
+		},
+		{
+			"name" : "open test case(s) in simulator gui",
+			"cmd" : "python test.py -v -g",
+		},
+	]
+
+}

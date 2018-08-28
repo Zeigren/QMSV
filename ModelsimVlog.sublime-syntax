@@ -1,0 +1,13 @@
+%YAML 1.2
+---
+name: ModelsimVlog Build Syntax
+file-extensions: 
+
+scope: ModelsimVlog.build
+
+contexts: 
+  main:
+    - match: '(Error).*'
+      scope: message.error
+    - match: '(Warning).*'
+      scope: keyword

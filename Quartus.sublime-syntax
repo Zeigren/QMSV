@@ -1,0 +1,15 @@
+%YAML 1.2
+---
+name: Quartus Build Syntax
+file-extensions: 
+
+scope: Quartus.build
+
+contexts: 
+  main:
+    - match: '(Error).*'
+      scope: keyword
+    - match: '(Warning).*'
+      scope: string
+    - match: '(Critical).*'
+      scope: message.error

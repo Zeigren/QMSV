@@ -1,0 +1,15 @@
+%YAML 1.2
+---
+name: VUnit Build Syntax
+file-extensions: 
+
+scope: VUnit.build
+
+contexts: 
+  main:
+    - match: 'fail.*'
+      scope: message.error
+    - match: 'pass.*'
+      scope: entity.name
+    - match: 'Error.*'
+      scope: keyword
