@@ -93,22 +93,64 @@ test_template = (
 )
 
 quartus_filetypes = {
-    ".verilog": "VERILOG_FILE",
-    ".vhdl": "VHDL_FILE",
-    ".vhd": "VHDL_FILE",
-    ".sdc": "SDC_FILE",
-    ".tdf": "AHDL_FILE",
-    ".bdf": "BDF_FILE",
+    ".bdf": "BDF_FILE",  # Design Files
+    ".cmp": "SOURCE_FILE",
+    ".cpp": "CUSP_FILE",
     ".edf": "EDIF_FILE",
+    ".edif": "EDIF_FILE",
+    ".edn": "EDIF_FILE",
+    ".gdf": "GDF_FILE",
+    ".h": "SOURCE_FILE",
+    ".ip": "IP_FILE",
+    ".mdl": "DSPBUILDER_FILE",
+    ".qdb": "QDB_FILE",
+    ".qip": "QIP_FILE",
+    ".qsys": "QSYS_FILE",
+    ".sdc": "SDC_FILE",
     ".smf": "SMF_FILE",
-    ".tcl": "TCL_SCRIPT_FILE",
-    ".hex": "HEX_FILE",
-    ".mif": "MIF_FILE",
-    ".inc": "INCLUDE_FILE",
-    ".bsf": "BSF_FILE",
-    ".txt": "TEXT_FILE",
     ".sv": "SYSTEMVERILOG_FILE",
-    ".v": "VERILOG_FILE"
+    ".tcl": "TCL_SCRIPT_FILE",
+    ".tdf": "AHDL_FILE",
+    ".txt": "TEXT_FILE",
+    ".v": "VERILOG_FILE",
+    ".verilog": "VERILOG_FILE",
+    ".vhd": "VHDL_FILE",
+    ".vhdl": "VHDL_FILE",
+    ".vlg": "VERILOG_FILE",
+    ".vqm": "VQM_FILE",
+    ".bsf": "BSF_FILE",  # Other Source Files
+    ".dpf": "SOURCE_FILE",
+    ".hex": "HEX_FILE",
+    ".inc": "INCLUDE_FILE",
+    ".ipx": "IPX_FILE",
+    ".lai": "LOGIC_ANALYZER_INTERFACE_FILE",
+    ".lmf": "LMF_FILE",
+    ".mif": "MIF_FILE",
+    ".pkg": "VERILOG_INCLUDE_FILE",
+    ".stp": "SIGNALTAP_FILE",
+    ".svh": "VERILOG_INCLUDE_FILE",
+    ".sym": "SYM_FILE",
+    ".vh": "VERILOG_INCLUDE_FILE",
+    ".cdf": "CDF_FILE",  # Programming Files
+    ".fcf": "SOURCE_FILE",
+    ".jam": "JAM_FILE",
+    ".jbc": "JBC_FILE",
+    ".jcf": "SOURCE_FILE",
+    ".jic": "SOURCE_FILE",
+    ".pof": "PROGRAMMER_OBJECT_FILE",
+    ".sof": "SRAM_OBJECT_FILE",
+    ".svf": "SVF_FILE",
+    ".pdc": "PDC_FILE",  # Script Files
+    ".sip": "SIP_FILE"
+}
+
+testbench_filetypes = {
+    ".v": "VERILOG_TEST_BENCH_FILE",
+    ".sv": "VERILOG_TEST_BENCH_FILE",
+    ".verilog": "VERILOG_TEST_BENCH_FILE",
+    ".vlg": "VERILOG_TEST_BENCH_FILE",
+    ".vhd": "VHDL_TEST_BENCH_FILE",
+    ".vhdl": "VHDL_TEST_BENCH_FILE"
 }
 
 
@@ -124,9 +166,9 @@ def create_quartus_qpf():
 def create_quartus_qsf():
 
     with open(f"{topfile}.qsf", "w+") as f:
-            f.write("set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top\n")
-            for i, item in enumerate(qsf_template):
-                f.writelines(set_global + item + "\n")
+        f.write("set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top\n")
+        for i, item in enumerate(qsf_template):
+            f.writelines(set_global + item + "\n")
 
 
 def create_test():
@@ -149,6 +191,7 @@ def create_tb_topfile():
     with open(f"src/test/{tb_topfile}.sv", "w") as f:
         f.write(f"{tb_topfile}.sv")
 
+
 def create_work_dir():
 
     pathlib.Path('work').mkdir(parents=True, exist_ok=True)
@@ -158,25 +201,28 @@ def update_quartus_qsf():
 
     lines = []
     print("Rebuilding")
+    # Removes files from .qsf
     for line in open(f'{topfile}.qsf').readlines():
         lines.append(line)
-        for key in quartus_filetypes:
-            if key in line:
+        for suf in quartus_filetypes:
+            if suf in line:
                 lines.remove(line)
                 break
     print("Rebuilt")
+    # Scans for files and adds them to .qsf
     open(f'{topfile}.qsf', 'w').writelines(lines)
-    src_files = sorted(pathlib.Path('./src').glob('*.*'))
+    src_files = sorted(pathlib.Path('./src').rglob('*.*'))
     for i, item in enumerate(src_files):
         item_string = str(item)
         file_name = item_string.replace('\\\', '/')
         suffix = pathlib.PurePath(item).suffix
         if suffix not in quartus_filetypes:
-            print(file_name + " not a supported filetype")
-        elif file_name in open(f'{topfile}.qsf').read():
-            print(file_name + f" already exists in {topfile}.qsf")
+            print("Not a supported filetype " + file_name + f" to {topfile}.qsf")
+        elif "/test/" in file_name and suffix in testbench_filetypes:
+            print("Including test file " + file_name)
+            open(f'{topfile}.qsf', 'a+').write(set_global + testbench_filetypes.get(suffix) + " " + file_name + "\n")
         elif file_name not in open(f'{topfile}.qsf').read():
-            print("Adding " + file_name + f" to {topfile}.qsf")
+            print("Including file " + file_name + f" to {topfile}.qsf")
             open(f'{topfile}.qsf', 'a+').write(set_global + quartus_filetypes.get(suffix) + " " + file_name + "\n")
 
 

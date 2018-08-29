@@ -25,7 +25,7 @@ QMSV contains build systems with syntax highlighting and in line errors* for Qua
 - Tab through and change the basic variables for Quartus, defaults to MAX10 10M08SCE144C8G with 3.3v everything
 - Build it (ctrl+b), it'll generate the Quartus Project files, a basic test.py for VUnit, a src/topfile.sv, a src/test/tb_topfile.sv, and a work folder.
 
-Any HDL or other files that are to be included in the Quartus project should be put into the 'src' folder, all test benches go into the 'src/test' folder and should be named 'tb_\*.\*' or '\*._tb.\*'. By default test benches are not added to the Quartus project.
+Any HDL or other files that are to be included in the Quartus project should be put into the 'src' folder, all test benches go into the 'src/test' folder and should be named 'tb_\*.\*' or '\*._tb.\*'. Supported file types in the test folder will be added to Quartus as testbench files.
 
 Besides creating the Quartus project quartusregen.py is also used to update it. Anytime files are added or removed run it to update the .qsf file.
 
