@@ -92,6 +92,28 @@ test_template = (
     "ui.main()"
 )
 
+sublime_project_template = (
+"{",
+    "\t\"folders\":",
+    "\t[",
+        "\t\t{",
+            "\t\t\t\"path\": \".\"",
+        "\t\t}",
+    "\t],",
+    "",
+    "\t\"build_systems\":",
+    "\t[",
+        "\t\t{",
+            "",
+        "\t\t}",
+    "\t],",
+    "\t\"settings\":",
+        "\t\t{",
+            "",
+        "\t\t},",
+"}",
+)
+
 quartus_filetypes = {
     ".bdf": "BDF_FILE",  # Design Files
     ".cmp": "SOURCE_FILE",
@@ -178,6 +200,13 @@ def create_test():
             f.writelines(item + "\n")
 
 
+def create_sublime_project():
+
+    with open(f"{topfile}.sublime-project", "w+") as f:
+        for i, item in enumerate(sublime_project_template):
+            f.writelines(item + "\n")
+
+
 def create_topfile():
 
     pathlib.Path('src').mkdir(parents=True, exist_ok=True)
@@ -205,9 +234,10 @@ def update_quartus_qsf():
     for line in open(f'{topfile}.qsf').readlines():
         lines.append(line)
         for suf in quartus_filetypes:
-            if suf in line:
-                lines.remove(line)
-                break
+            if "src/" in line:
+                if suf in line:
+                    lines.remove(line)
+                    break
     print("Rebuilt")
     # Scans for files and adds them to .qsf
     open(f'{topfile}.qsf', 'w').writelines(lines)
@@ -245,6 +275,14 @@ else:
     create_test()
 
 
+# Create sublime-project file
+if pathlib.Path(f'{topfile}.sublime-project').exists():
+    print(f"A {topfile}.sublime-project file already exists")
+else:
+    print(f"Creating {topfile}.sublime-project")
+    create_sublime_project()
+
+
 # Create topfile and src dir
 if pathlib.Path(f'./src/{topfile}.sv').exists():
     print(f"src folder already contains '{topfile}.sv'")
@@ -268,8 +306,9 @@ if pathlib.Path(f'{topfile}.qsf').exists():
 elif sorted(pathlib.Path('.').glob('*.qsf')):
     print("A Quartus QSF file already exists")
 else:
-    print("Creating Quartus QSF file")
+    print("Creating and updating Quartus QSF file")
     create_quartus_qsf()
+    update_quartus_qsf()
 
 
 # Create work dir for ModelSim

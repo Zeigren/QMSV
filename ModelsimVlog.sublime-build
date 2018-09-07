@@ -1,7 +1,7 @@
 {
-	"shell_cmd": "%QUARTUS_ROOTDIR%\\modelsim_ase\\win32aloem\\vlog.exe -lint -sv $file",
+	"shell_cmd": "%QUARTUS_ROOTDIR%\\modelsim_ase\\win32aloem\\vlog.exe -lint -sv \"$file\"",
 	"working_dir": "$folder",
-	"file_regex": "^\\*\\* (?:\\w[^\\n]+) ((?:\\w\\:)?[^\\n]+)\\((\\d+)\\)\\: ()([^\\n]+)$",
+	"file_regex": "^\\*\\* (?:\\w[^\\n]+) ((?:\\w\\:)+?[^\\n]+)\\((\\d+)\\)\\: ()([^\\n]+)$",
 	"syntax": "ModelsimVlog.sublime-syntax",
 	"file_patterns": ["*.sv", "*.v", "*.verilog", "*.vhd", "*.vhdl"],
 	"selector": "source.SystemVerilog",
