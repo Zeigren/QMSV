@@ -114,6 +114,20 @@ sublime_project_template = (
 "}",
 )
 
+gitignore_template = (
+    "## Ignore ModelSim\n",
+    "work/\n",
+    "## Ignore VUnit\n",
+    "vunit_out/\n",
+    "## Ignore Sublime Text\n",
+    "*.sublime-workspace\n",
+    "## Ignore Quartus\n",
+    "db/",
+    "incremental_db/",
+    "output_files/",
+    "*.qws",
+)
+
 quartus_filetypes = {
     ".bdf": "BDF_FILE",  # Design Files
     ".cmp": "SOURCE_FILE",
@@ -207,6 +221,13 @@ def create_sublime_project():
             f.writelines(item + "\n")
 
 
+def create_gitignore():
+
+    with open(".gitignore", "w+") as f:
+        for i, item in enumerate(gitignore_template):
+            f.writelines(item + "\n")
+
+
 def create_topfile():
 
     pathlib.Path('src').mkdir(parents=True, exist_ok=True)
@@ -281,6 +302,14 @@ if pathlib.Path(f'{topfile}.sublime-project').exists():
 else:
     print(f"Creating {topfile}.sublime-project")
     create_sublime_project()
+
+
+# Create .gitignore
+if pathlib.Path('.gitignore').exists():
+    print("A gitignore file already exists")
+else:
+    print("Creating gitignore")
+    create_gitignore()
 
 
 # Create topfile and src dir
