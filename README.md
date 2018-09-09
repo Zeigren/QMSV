@@ -2,7 +2,7 @@
 
 The idea of QMSV is to make Intel/Altera FPGA development outside of the Quartus/ModelSim GUIs somewhat easier, hopefully while making some improvements. It uses [Sublime Text 3](https://www.sublimetext.com) with the [Sublime System Verilog](https://sv-doc.readthedocs.io/en/latest/) package to improve the actual HDL writing experience. Quartus is used for all the typical stuff, and ModelSim for linting. [VUnit](https://vunit.github.io/index.html) is used as a unit testing framework, in this case for ModelSim which runs any tests or simulations.
 
-QMSV contains build systems with syntax highlighting and in line errors* for Quartus, ModelSim, and VUnit. As well as a snippet for a python script that is used for generating and updating Quartus project files, it also creates the basic folder structure, a VUnit python script, a Sublime Text project file, and a .gitignore file. There is also a included snippet to create GPL v3 headers in your SystemVerilog or Verilog files.
+QMSV contains build systems with syntax highlighting and in line errors* for Quartus, ModelSim, and VUnit. As well as a snippet for a python script that is used for generating and updating Quartus project files, it also creates the basic folder structure, a VUnit python script, a Sublime Text project file, and a .gitignore file. There is an included snippet to create GPL v3 headers in your SystemVerilog or Verilog files. Also included is an extended Monokai color scheme to support additional scopes in the SystemVerilog package, you can test it out with the syntax_test_SystemVerilog.sv.
 
 QMSV is currently designed for use in Windows.
 
